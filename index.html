@@ -783,7 +783,7 @@ function htmlQuestion(step) {
 
   } else if (step.type === 'text') {
     body = `<textarea id="ta-${step.id}" placeholder="${step.ph}" rows="5"
-      oninput="answers['${step.id}']=this.value">${answers[step.id]||''}</textarea>`;
+      oninput="answers['${step.id}']=this.value;updateNav()">${answers[step.id]||''}</textarea>`;
 
   } else if (step.type === 'pick2') {
     const sel = answers[step.id] || [];
