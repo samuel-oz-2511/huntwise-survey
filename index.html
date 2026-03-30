@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>HuntWise · Share Your Experience</title>
+  <title>Huntwise · Share Your Experience</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -11,7 +11,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* ── HuntWise brand palette ── */
+      /* ── Huntwise brand palette ── */
       --primary:      #7878E8;   /* periwinkle blue  */
       --primary-h:    #6565D6;   /* hover            */
       --primary-soft: rgba(120,120,232,0.08);
@@ -625,7 +625,7 @@ const STEPS = [
   { id:'welcome' },
   { id:'identity' },
   { id:'q1', section:'Getting Started',
-    q:'How did you first hear about HuntWise?', type:'single',
+    q:'How did you first hear about Huntwise?', type:'single',
     opts:[{em:'💼',t:'LinkedIn / social media'},{em:'👥',t:'Friend or colleague referral'},
           {em:'🔍',t:'Google / online search'},{em:'💬',t:'WhatsApp / community group'},{em:'✨',t:'Other'}]
   },
@@ -650,17 +650,17 @@ const STEPS = [
     type:'text', optional:true, ph:'Tell us what surprised you or felt broken…'
   },
   { id:'q6', section:'Value',
-    q:'Did HuntWise help you take a concrete action in your job search?', type:'single',
+    q:'Did Huntwise help you take a concrete action in your job search?', type:'single',
     opts:[{em:'🚀',t:'Yes — I applied to jobs I found here'},{em:'📝',t:'Yes — I improved my CV based on it'},
           {em:'💡',t:"Somewhat — useful insights but I haven't acted yet"},
           {em:'🔭',t:"Not really — I'm still exploring"},{em:'❌',t:"No — it didn't fit what I needed"}]
   },
   { id:'q7', section:'Value',
-    q:'Compared to how you managed your job search before, HuntWise is:', type:'single',
+    q:'Compared to how you managed your job search before, Huntwise is:', type:'single',
     opts:[{em:'🏆',t:'Much better'},{em:'👍',t:'Somewhat better'},{em:'😐',t:'About the same'},{em:'👎',t:'Worse'}]
   },
   { id:'q8', section:'Improvement',
-    q:"What's the ONE thing that would make you use HuntWise every week?",
+    q:"What's the ONE thing that would make you use Huntwise every week?",
     type:'text', optional:false, ph:'Be as specific as you like…'
   },
   { id:'q9', section:'Improvement',
@@ -670,10 +670,10 @@ const STEPS = [
           {em:'📊',t:'CV scoring before applying'},{em:'💰',t:'Salary benchmarking'}]
   },
   { id:'q10', section:'Closing',
-    q:"How likely are you to recommend HuntWise to a friend who's job hunting?", type:'nps'
+    q:"How likely are you to recommend Huntwise to a friend who's job hunting?", type:'nps'
   },
   { id:'q11', section:'Closing',
-    q:'Would you be willing to pay for HuntWise if it helped you land a job faster?', type:'single',
+    q:'Would you be willing to pay for Huntwise if it helped you land a job faster?', type:'single',
     opts:[{em:'💳',t:'Yes — if the value is clear'},{em:'🤷',t:'Maybe — depends on the price'},
           {em:'🆓',t:'No — I expect it to be free'},{em:'✅',t:'I already have a job / was just exploring'}]
   },
@@ -701,7 +701,7 @@ function htmlWelcome() {
     </div>
     <div class="early-badge"><div class="early-dot"></div>Early Access Survey</div>
     <h1 class="welcome-h1">You're one of our<br><em>first users ever.</em></h1>
-    <p class="welcome-p">We're building HuntWise for job seekers like you. This quick survey (≈5 min) helps us understand what's working, what's not, and what to build next.</p>
+    <p class="welcome-p">We're building Huntwise for job seekers like you. This quick survey (≈5 min) helps us understand what's working, what's not, and what to build next.</p>
     <div class="welcome-pills">
       <span class="pill">⏱️ 5 minutes</span>
       <span class="pill">🔒 Private by default</span>
@@ -715,7 +715,7 @@ function htmlIdentity() {
   return `<div class="step">
     <div class="section-badge">Who are you?</div>
     <h2 class="q-text">Before we start — let us know who you are</h2>
-    <p class="q-sub" style="margin-bottom:24px">Your HuntWise phone number links your answers to your account so we can follow up if needed. You can opt out below.</p>
+    <p class="q-sub" style="margin-bottom:24px">Your Huntwise phone number links your answers to your account so we can follow up if needed. You can opt out below.</p>
     <div id="phone-section">
       <div class="phone-row">
         <div class="flag-badge">🇮🇱</div>
@@ -738,8 +738,8 @@ function htmlThankYou() {
   return `<div class="step ty-inner">
     <div class="ty-circle">✓</div>
     <h2 class="ty-h">Thank you so much! 🙌</h2>
-    <p class="ty-p">Your feedback goes directly to the team building HuntWise. We read every single response — it genuinely shapes what we build next.</p>
-    <div class="ty-note">🚀 We're working hard to make HuntWise the best job search tool in Israel. Stay tuned for what's coming!</div>
+    <p class="ty-p">Your feedback goes directly to the team building Huntwise. We read every single response — it genuinely shapes what we build next.</p>
+    <div class="ty-note">🚀 We're working hard to make Huntwise the best job search tool in Israel. Stay tuned for what's coming!</div>
   </div>`;
 }
 
@@ -886,7 +886,7 @@ function updatePhoneStatus(val, strict) {
     st.innerHTML = '✓ &nbsp;Number recognized — you\'re all set';
   } else if (strict && /^05\d{8}$/.test(n)) {
     st.className = 'phone-status err';
-    st.innerHTML = '✗ &nbsp;Number not found in HuntWise — double-check it';
+    st.innerHTML = '✗ &nbsp;Number not found in Huntwise — double-check it';
   } else if (strict && val.replace(/\D/g,'').length >= 9) {
     st.className = 'phone-status err';
     st.innerHTML = '✗ &nbsp;Enter a valid Israeli mobile (05X-XXX-XXXX)';
