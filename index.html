@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HuntWise · Share Your Experience</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:            #07111F;
+      --primary:       #FF6B2C;
+      --primary-h:     #E55A1F;
+      --primary-soft:  rgba(255,107,44,0.09);
+      --teal:          #00C9A7;
+      --card:          #FFFFFF;
+      --ink:           #0D1F38;
+      --ink-mid:       #4B5563;
+      --ink-soft:      #94A3B8;
+      --border:        #E2E8F0;
+      --sel-bg:        #FFF5F1;
+      --error:         #EF4444;
+      --success:       #10B981;
+      --radius:        20px;
+      --radius-s:      11px;
+      --shadow:        0 28px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+      --ease:          cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Animated background ─────────────────────────────── */
+    .orbs {
+      position: fixed; inset: 0;
+      pointer-events: none; overflow: hidden; z-index: 0;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(110px); opacity: 0.55;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+    .orb-1 { width:560px;height:560px; background:radial-gradient(circle,rgba(0,201,167,0.28),transparent 70%); top:-140px;left:-100px; animation-delay:0s; }
+    .orb-2 { width:420px;height:420px; background:radial-gradient(circle,rgba(255,107,44,0.22),transparent 70%); bottom:-80px;right:-80px; animation-delay:-5s; }
+    .orb-3 { width:320px;height:320px; background:radial-gradient(circle,rgba(99,102,241,0.18),transparent 70%); top:45%;left:55%; animation-delay:-10s; }
+    @keyframes drift {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(28px,18px) scale(1.08); }
+    }
+
+    /* ── Layout ──────────────────────────────────────────── */
+    #app {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px 16px 40px;
+    }
+
+    /* ── Progress ────────────────────────────────────────── */
+    #prog-wrap {
+      width: 100%; max-width: 660px;
+      display: none; align-items: center; gap: 14px;
+      margin-bottom: 14px;
+    }
+    #prog-track {
+      flex: 1; height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 100px; overflow: hidden;
+    }
+    #prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--primary));
+      border-radius: 100px;
+      transition: width 0.5s var(--ease);
+    }
+    #prog-label {
+      font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,0.38);
+      white-space: nowrap; min-width: 46px; text-align: right;
+    }
+
+    /* ── Card ────────────────────────────────────────────── */
+    #card {
+      width: 100%; max-width: 660px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* ── Step container ──────────────────────────────────── */
+    #step-wrap { position: relative; overflow: hidden; }
+
+    .step {
+      padding: 52px 52px 36px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    /* slide animations */
+    @keyframes inRight  { from { transform:translateX(56px);  opacity:0 } to { transform:translateX(0); opacity:1 } }
+    @keyframes inLeft   { from { transform:translateX(-56px); opacity:0 } to { transform:translateX(0); opacity:1 } }
+    @keyframes outLeft  { from { transform:translateX(0); opacity:1 } to { transform:translateX(-56px);  opacity:0 } }
+    @keyframes outRight { from { transform:translateX(0); opacity:1 } to { transform:translateX(56px); opacity:0 } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+
+    .in-right  { animation: inRight  0.34s var(--ease) both }
+    .in-left   { animation: inLeft   0.34s var(--ease) both }
+    .out-left  { animation: outLeft  0.34s var(--ease) both; pointer-events:none }
+    .out-right { animation: outRight 0.34s var(--ease) both; pointer-events:none }
+
+    /* ── Typography ──────────────────────────────────────── */
+    .section-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--primary);
+      margin-bottom: 14px;
+    }
+    .section-badge::before {
+      content: '';
+      display: block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--primary);
+    }
+
+    .q-text {
+      font-size: 23px; font-weight: 700; line-height: 1.32;
+      color: var(--ink); margin-bottom: 6px;
+    }
+    .q-sub {
+      font-size: 14px; color: var(--ink-mid);
+      line-height: 1.5; margin-bottom: 28px;
+    }
+    .optional {
+      font-size: 12px; font-weight: 400;
+      color: var(--ink-soft); margin-left: 8px;
+    }
+
+    /* ── Options ─────────────────────────────────────────── */
+    .options { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
+
+    .opt {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-s);
+      cursor: pointer;
+      transition: border-color .2s var(--ease), background .2s var(--ease), transform .15s var(--ease);
+      user-select: none; background: #fff;
+    }
+    .opt:hover { border-color: var(--primary); background: var(--primary-soft); transform: translateX(2px); }
+    .opt.sel  { border-color: var(--primary); background: var(--sel-bg); }
+
+    .opt-dot {
+      flex-shrink: 0; width: 19px; height: 19px;
+      border-radius: 50%; border: 2px solid var(--border);
+      transition: all .2s var(--ease);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .opt.sel .opt-dot { border-color: var(--primary); background: var(--primary); }
+    .opt.sel .opt-dot::after { content:''; width:6px;height:6px; border-radius:50%; background:#fff; }
+
+    /* checkbox variant */
+    .opt.cb .opt-dot { border-radius: 5px; }
+    .opt.cb.sel .opt-dot::after {
+      content:''; width:9px;height:6px;
+      border:2px solid #fff; border-top:none; border-right:none;
+      transform:rotate(-45deg) translateY(-1px);
+      border-radius:0; background:transparent;
+    }
+
+    .opt-em { font-size: 19px; flex-shrink: 0; }
+    .opt-txt { font-size: 14.5px; font-weight: 500; color: var(--ink); line-height: 1.4; }
+
+    /* ── Scale 1-5 ───────────────────────────────────────── */
+    .scale-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .scale-item {
+      flex: 1; min-width: 64px; max-width: 100px;
+      aspect-ratio: 1;
+      border: 1.5px solid var(--border); border-radius: var(--radius-s);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; cursor: pointer;
+      transition: all .2s var(--ease);
+      user-select: none;
+    }
+    .scale-item:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .scale-item.sel   { border-color: var(--primary); background: var(--sel-bg); }
+    .scale-item .em   { font-size: 24px; }
+    .scale-item .lbl  { font-size: 11px; color: var(--ink-soft); font-weight: 500; }
+    .scale-ends {
+      display: flex; justify-content: space-between;
+      margin-top: 8px; font-size: 12px; color: var(--ink-soft);
+    }
+
+    /* ── NPS ─────────────────────────────────────────────── */
+    .nps-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+    .nps-btn {
+      flex: 1; min-width: 36px; height: 46px;
+      border: 1.5px solid var(--border); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600; color: var(--ink-mid);
+      cursor: pointer;
+      transition: all .18s var(--ease);
+      user-select: none;
+    }
+    .nps-btn:hover { transform: translateY(-3px); }
+    /* colour-coded by value */
+    .nps-btn[data-v="0"],[data-v="1"],[data-v="2"],[data-v="3"],[data-v="4"],[data-v="5"],[data-v="6"] { --nc:#EF4444 }
+    .nps-btn[data-v="7"],[data-v="8"]  { --nc:#F59E0B }
+    .nps-btn[data-v="9"],[data-v="10"] { --nc:#10B981 }
+    .nps-btn.sel { background: var(--nc); border-color: var(--nc); color: #fff; }
+    .nps-ends { display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--ink-soft); }
+
+    /* ── Follow-up (NPS) ─────────────────────────────────── */
+    .followup {
+      display: none; margin-top: 22px; padding-top: 22px;
+      border-top: 1px solid var(--border);
+      animation: fadeUp .3s ease;
+    }
+    .followup.on { display: block; }
+    .followup-label { font-size: 13px; font-weight: 600; color: var(--ink-mid); margin-bottom: 10px; }
+
+    /* ── Pick 2 ──────────────────────────────────────────── */
+    .pick2-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-top: 4px;
+    }
+    .p2-item {
+      padding: 18px 16px; position: relative;
+      border: 1.5px solid var(--border); border-radius: var(--radius-s);
+      cursor: pointer;
+      transition: all .2s var(--ease);
+      user-select: none;
+    }
+    .p2-item:hover:not(.dim) { border-color: var(--primary); background: var(--primary-soft); }
+    .p2-item.sel  { border-color: var(--primary); background: var(--sel-bg); }
+    .p2-item.dim  { opacity: .38; cursor: not-allowed; }
+    .p2-badge {
+      position: absolute; top: 8px; right: 8px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .p2-em  { font-size: 22px; margin-bottom: 8px; }
+    .p2-txt { font-size: 13px; font-weight: 500; color: var(--ink); line-height: 1.4; }
+
+    /* ── Textarea / Input ────────────────────────────────── */
+    textarea, input[type="tel"] {
+      width: 100%; padding: 15px 16px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-s);
+      font-family: inherit; font-size: 15px; color: var(--ink);
+      outline: none; background: #fff;
+      transition: border-color .2s var(--ease);
+      resize: none;
+    }
+    textarea:focus, input[type="tel"]:focus { border-color: var(--primary); }
+    textarea { min-height: 128px; }
+
+    /* ── Phone field ─────────────────────────────────────── */
+    .phone-row { display: flex; align-items: center; gap: 12px; }
+    .flag-badge {
+      height: 52px; padding: 0 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-s);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; background: #F8FAFC; flex-shrink: 0;
+    }
+    .phone-status {
+      min-height: 22px; margin-top: 9px;
+      font-size: 13px; display: flex; align-items: center; gap: 6px;
+      transition: all .2s;
+    }
+    .phone-status.ok  { color: var(--success); }
+    .phone-status.err { color: var(--error); }
+
+    /* ── Anon toggle ─────────────────────────────────────── */
+    .anon-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 22px; cursor: pointer; user-select: none;
+    }
+    .anon-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border); border-radius: 4px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .anon-box.on { background: var(--ink); border-color: var(--ink); }
+    .anon-box.on::after {
+      content:''; width:9px;height:6px;
+      border:2px solid #fff; border-top:none; border-right:none;
+      transform:rotate(-45deg) translateY(-1px);
+    }
+    .anon-label { font-size: 14px; color: var(--ink-mid); }
+
+    /* ── Error hint ──────────────────────────────────────── */
+    .err-hint { display:none; font-size:13px; color:var(--error); margin-top:10px; }
+    .err-hint.on { display:block; animation:fadeUp .2s ease; }
+
+    /* ── Nav ─────────────────────────────────────────────── */
+    #nav {
+      padding: 22px 52px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    #nav.centered { justify-content: center; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: 100px;
+      font-family: inherit; font-size: 15px; font-weight: 600;
+      cursor: pointer; border: none; outline: none;
+      transition: all .2s var(--ease);
+    }
+    .btn-ghost {
+      background: transparent; color: var(--ink-soft);
+    }
+    .btn-ghost:hover:not(:disabled) { color: var(--ink); }
+    .btn-ghost:disabled { opacity: 0; pointer-events: none; }
+
+    .btn-primary {
+      background: var(--primary); color: #fff;
+      box-shadow: 0 4px 14px rgba(255,107,44,0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-h);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(255,107,44,0.38);
+    }
+    .btn-primary:disabled { opacity: .42; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-lg { padding: 16px 44px; font-size: 16px; }
+
+    /* ── Welcome ─────────────────────────────────────────── */
+    .welcome-inner {
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 9px;
+      margin-bottom: 36px;
+    }
+    .logo-mark {
+      width: 38px; height: 38px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--primary), #FF9A5C);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .logo-name { font-size: 21px; font-weight: 800; color: var(--ink); }
+    .logo-name span { color: var(--primary); }
+
+    .welcome-hero { font-size: 56px; margin-bottom: 18px; }
+    .welcome-h1 {
+      font-size: 32px; font-weight: 800; line-height: 1.2;
+      color: var(--ink); margin-bottom: 16px;
+    }
+    .welcome-h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--primary) 30%, #FF9A5C);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome-p {
+      font-size: 16px; color: var(--ink-mid);
+      line-height: 1.65; max-width: 400px; margin-bottom: 36px;
+    }
+    .welcome-pills {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 8px;
+    }
+    .pill {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--ink-soft);
+    }
+
+    /* ── Thank you ───────────────────────────────────────── */
+    .ty-inner {
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center; gap: 0;
+    }
+    .ty-circle {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), #00A88D);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px; margin-bottom: 26px;
+      animation: popIn .55s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .ty-h { font-size: 30px; font-weight: 800; color: var(--ink); margin-bottom: 14px; }
+    .ty-p { font-size: 16px; color: var(--ink-mid); line-height: 1.65; max-width: 400px; margin-bottom: 32px; }
+    .ty-note {
+      padding: 20px 24px; background: #F8FAFC;
+      border-radius: 14px; max-width: 400px; width: 100%;
+      font-size: 14px; color: var(--ink-mid); line-height: 1.6;
+    }
+
+    /* ── Confetti ────────────────────────────────────────── */
+    .cf {
+      position: fixed; pointer-events: none; z-index: 9999;
+      border-radius: 2px;
+      animation: cfFall linear forwards;
+    }
+    @keyframes cfFall {
+      0%   { transform:translateY(-20px) rotate(0deg);   opacity:1 }
+      100% { transform:translateY(105vh) rotate(720deg); opacity:0 }
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .step { padding: 36px 24px 28px; }
+      #nav  { padding: 20px 24px; }
+      .q-text { font-size: 19px; }
+      .welcome-h1 { font-size: 26px; }
+      .pick2-grid { grid-template-columns: 1fr; }
+      .nps-btn { font-size: 12px; min-width: 28px; }
+      .btn-lg { padding: 14px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div id="app">
+  <div id="prog-wrap">
+    <div id="prog-track"><div id="prog-fill" style="width:0%"></div></div>
+    <div id="prog-label">1 of 13</div>
+  </div>
+
+  <div id="card">
+    <div id="step-wrap"></div>
+    <div id="nav">
+      <button id="btn-back" class="btn btn-ghost" onclick="goBack()">← Back</button>
+      <button id="btn-next" class="btn btn-primary btn-lg" onclick="goNext()">Let's go →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+// Replace with your Formspree / backend endpoint
+const SUBMIT_URL = '';
+
+// ── VALID PHONES (normalized: 10 digits starting with 05) ─────────────────────
+const VALID_PHONES = new Set([
+  "0502925882","0503730027","0504412111","0505652747",
+  "0505755372","0506466242","0508356595","0509713601",
+  "0523848437","0524616875","0524670839","0524736622",
+  "0525298910","0525556337","0528233354","0528613745",
+  "0543030290","0543188799","0543518835","0545313176",
+  "0545604873","0545786163","0546360011","0547675093",
+  "0549848979","0556669857","0583210043","0585584000"
+]);
+
+// ── PHONE UTILS ───────────────────────────────────────────────────────────────
+function normalizePhone(raw) {
+  let s = raw.replace(/[\s\-\(\)\.]/g, '');
+  if      (s.startsWith('+9720')) s = '0' + s.slice(5);
+  else if (s.startsWith('+972'))  s = '0' + s.slice(4);
+  else if (s.startsWith('00972')) s = '0' + s.slice(5);
+  else if (s.startsWith('9720'))  s = '0' + s.slice(4);
+  else if (s.startsWith('972'))   s = '0' + s.slice(3);
+  return s.replace(/^\+/, '');
+}
+function phoneValid(raw) {
+  const n = normalizePhone(raw);
+  return /^05\d{8}$/.test(n) && VALID_PHONES.has(n);
+}
+function phoneFormat(raw) {
+  // auto-format as 05X-XXX-XXXX while typing
+  const digits = raw.replace(/\D/g,'').slice(0,10);
+  if (digits.length <= 3)  return digits;
+  if (digits.length <= 6)  return digits.slice(0,3)+'-'+digits.slice(3);
+  return digits.slice(0,3)+'-'+digits.slice(3,6)+'-'+digits.slice(6);
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let cur = 0, answers = {}, isAnon = false, busy = false;
+
+// ── STEPS ─────────────────────────────────────────────────────────────────────
+const STEPS = [
+  { id:'welcome' },
+  { id:'identity' },
+  {
+    id:'q1', section:'Getting Started',
+    q:'How did you first hear about HuntWise?',
+    type:'single',
+    opts:[
+      {em:'💼', t:'LinkedIn / social media'},
+      {em:'👥', t:'Friend or colleague referral'},
+      {em:'🔍', t:'Google / online search'},
+      {em:'💬', t:'WhatsApp / community group'},
+      {em:'✨', t:'Other'},
+    ]
+  },
+  {
+    id:'q2', section:'Getting Started',
+    q:'How long did it take to upload your CV and see job matches?',
+    type:'single',
+    opts:[
+      {em:'⚡', t:'Less than 5 minutes'},
+      {em:'☕', t:'5–15 minutes'},
+      {em:'⏱️', t:'15–30 minutes'},
+      {em:'😤', t:'More than 30 minutes'},
+      {em:'🤔', t:"I'm still not sure I set it up correctly"},
+    ]
+  },
+  {
+    id:'q3', section:'Functionality',
+    q:'Which features did you actually use?',
+    type:'multi', sub:'Select all that apply',
+    opts:[
+      {em:'📄', t:'Uploaded my CV'},
+      {em:'🎯', t:'Viewed job matches'},
+      {em:'✏️', t:'Adapted my CV for a specific job'},
+      {em:'⚙️', t:'Set job preferences (location, seniority, work type)'},
+      {em:'🧠', t:'Reviewed my extracted profile / skills'},
+      {em:'🚫', t:'None of the above'},
+    ]
+  },
+  {
+    id:'q4', section:'Functionality',
+    q:'How well did the job matches reflect what you\'re actually looking for?',
+    type:'scale5',
+    ems:['😞','😕','😐','🙂','😍'],
+    ends:['Completely off','Spot on'],
+  },
+  {
+    id:'q5', section:'Functionality',
+    q:'Did anything in the platform not work as you expected?',
+    type:'text', optional:true,
+    ph:'Tell us what surprised you or felt broken…'
+  },
+  {
+    id:'q6', section:'Value',
+    q:'Did HuntWise help you take a concrete action in your job search?',
+    type:'single',
+    opts:[
+      {em:'🚀', t:'Yes — I applied to jobs I found here'},
+      {em:'📝', t:'Yes — I improved my CV based on it'},
+      {em:'💡', t:"Somewhat — useful insights but I haven't acted yet"},
+      {em:'🔭', t:"Not really — I'm still exploring"},
+      {em:'❌', t:"No — it didn't fit what I needed"},
+    ]
+  },
+  {
+    id:'q7', section:'Value',
+    q:'Compared to how you managed your job search before, HuntWise is:',
+    type:'single',
+    opts:[
+      {em:'🏆', t:'Much better'},
+      {em:'👍', t:'Somewhat better'},
+      {em:'😐', t:'About the same'},
+      {em:'👎', t:'Worse'},
+    ]
+  },
+  {
+    id:'q8', section:'Improvement',
+    q:'What\'s the ONE thing that would make you use HuntWise every week?',
+    type:'text', optional:false,
+    ph:'Be as specific as you like…'
+  },
+  {
+    id:'q9', section:'Improvement',
+    q:'Which would you most want us to build next?',
+    type:'pick2', sub:'Pick your top 2',
+    opts:[
+      {em:'🔔', t:'Alerts when new matching jobs are posted'},
+      {em:'📋', t:'Application tracker'},
+      {em:'🎤', t:'Interview prep based on the job'},
+      {em:'👀', t:'Recruiter visibility'},
+      {em:'📊', t:'CV scoring before applying'},
+      {em:'💰', t:'Salary benchmarking'},
+    ]
+  },
+  {
+    id:'q10', section:'Closing',
+    q:'How likely are you to recommend HuntWise to a friend who\'s job hunting?',
+    type:'nps'
+  },
+  {
+    id:'q11', section:'Closing',
+    q:'Would you be willing to pay for HuntWise if it helped you land a job faster?',
+    type:'single',
+    opts:[
+      {em:'💳', t:'Yes — if the value is clear'},
+      {em:'🤷', t:'Maybe — depends on the price'},
+      {em:'🆓', t:'No — I expect it to be free'},
+      {em:'✅', t:'I already have a job / was just exploring'},
+    ]
+  },
+  {
+    id:'q12', section:'Closing',
+    q:'Anything else you want us to know?',
+    type:'text', optional:true,
+    ph:'Open mic — tell us anything…'
+  },
+  { id:'thankyou' }
+];
+
+const Q_STEPS = STEPS.filter(s => s.id.startsWith('q'));
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function html(step) {
+  if (step.id === 'welcome')   return htmlWelcome();
+  if (step.id === 'identity')  return htmlIdentity();
+  if (step.id === 'thankyou')  return htmlThankYou();
+  return htmlQuestion(step);
+}
+
+function htmlWelcome() {
+  return `<div class="step welcome-inner">
+    <div class="logo">
+      <div class="logo-mark">🎯</div>
+      <div class="logo-name">Hunt<span>Wise</span></div>
+    </div>
+    <div class="welcome-hero">👋</div>
+    <h1 class="welcome-h1">You're one of our<br><em>first users ever.</em></h1>
+    <p class="welcome-p">We're building HuntWise for job seekers like you. This quick survey (≈5 min) helps us understand what's working, what's not, and what to build next.</p>
+    <div class="welcome-pills">
+      <span class="pill">⏱️ 5 minutes</span>
+      <span class="pill">🔒 Private by default</span>
+      <span class="pill">🎯 13 questions</span>
+    </div>
+  </div>`;
+}
+
+function htmlIdentity() {
+  const ph = answers.phone || '';
+  return `<div class="step">
+    <div class="section-badge">Who are you?</div>
+    <h2 class="q-text">Before we start — let us know who you are</h2>
+    <p class="q-sub" style="margin-bottom:24px">Your HuntWise phone number links your answers to your account so we can follow up if needed. You can opt out below.</p>
+    <div id="phone-section">
+      <div class="phone-row">
+        <div class="flag-badge">🇮🇱</div>
+        <input type="tel" id="phone-input" placeholder="05X-XXX-XXXX"
+          value="${ph}" autocomplete="tel" inputmode="tel"
+          style="flex:1;height:52px"
+          oninput="onPhoneInput(this)"
+          onblur="onPhoneBlur(this)" />
+      </div>
+      <div class="phone-status" id="phone-status"></div>
+    </div>
+    <label class="anon-row" onclick="toggleAnon()">
+      <div class="anon-box${isAnon?' on':''}" id="anon-box"></div>
+      <span class="anon-label">I prefer to respond anonymously</span>
+    </label>
+  </div>`;
+}
+
+function htmlThankYou() {
+  return `<div class="step ty-inner">
+    <div class="ty-circle">✓</div>
+    <h2 class="ty-h">Thank you so much! 🙌</h2>
+    <p class="ty-p">Your feedback goes directly to the team building HuntWise. We read every single response — it genuinely shapes what we build next.</p>
+    <div class="ty-note">🚀 We're working hard to make HuntWise the best job search tool in Israel. Stay tuned for what's coming!</div>
+  </div>`;
+}
+
+function htmlQuestion(step) {
+  const qNum = Q_STEPS.findIndex(s => s.id === step.id) + 1;
+  let body = '';
+
+  if (step.type === 'single' || step.type === 'multi') {
+    const multi = step.type === 'multi';
+    body = `<div class="options">
+      ${step.opts.map((o,i) => {
+        const sel = multi
+          ? (answers[step.id]||[]).includes(i)
+          : answers[step.id] === i;
+        return `<div class="opt${multi?' cb':''}${sel?' sel':''}" data-i="${i}"
+          onclick="pickOpt('${step.id}',${i},${multi})"
+        >
+          <div class="opt-dot"></div>
+          <span class="opt-em">${o.em}</span>
+          <span class="opt-txt">${o.t}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  } else if (step.type === 'scale5') {
+    body = `<div class="scale-row">
+      ${step.ems.map((em,i) => `
+        <div class="scale-item${answers[step.id]===i+1?' sel':''}"
+          onclick="pickScale('${step.id}',${i+1})">
+          <span class="em">${em}</span>
+          <span class="lbl">${i+1}</span>
+        </div>`).join('')}
+    </div>
+    <div class="scale-ends"><span>${step.ends[0]}</span><span>${step.ends[1]}</span></div>`;
+
+  } else if (step.type === 'nps') {
+    const v = answers[step.id];
+    body = `<div class="nps-row">
+      ${[0,1,2,3,4,5,6,7,8,9,10].map(n => `
+        <div class="nps-btn${v===n?' sel':''}" data-v="${n}"
+          onclick="pickNps(${n})">${n}</div>`).join('')}
+    </div>
+    <div class="nps-ends"><span>Not at all likely</span><span>Extremely likely</span></div>
+    <div class="followup${v!==undefined&&v<=6?' on':''}" id="nps-fu">
+      <div class="followup-label">What's the main reason for that score?</div>
+      <textarea id="nps-reason" placeholder="Help us understand…" rows="3" oninput="answers.nps_reason=this.value">${answers.nps_reason||''}</textarea>
+    </div>`;
+
+  } else if (step.type === 'text') {
+    body = `<textarea id="ta-${step.id}" placeholder="${step.ph}" rows="5"
+      oninput="answers['${step.id}']=this.value">${answers[step.id]||''}</textarea>`;
+
+  } else if (step.type === 'pick2') {
+    const sel = answers[step.id] || [];
+    body = `<div class="pick2-grid">
+      ${step.opts.map((o,i) => {
+        const si = sel.indexOf(i);
+        const on = si !== -1;
+        const dim = !on && sel.length >= 2;
+        return `<div class="p2-item${on?' sel':''}${dim?' dim':''}" data-i="${i}"
+          onclick="pickP2('${step.id}',${i})">
+          ${on ? `<div class="p2-badge">${si+1}</div>` : ''}
+          <div class="p2-em">${o.em}</div>
+          <div class="p2-txt">${o.t}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  return `<div class="step">
+    <div class="section-badge">${step.section}</div>
+    <h2 class="q-text">${step.q}${step.optional?`<span class="optional">optional</span>`:''}</h2>
+    ${step.sub ? `<p class="q-sub">${step.sub}</p>` : ''}
+    ${body}
+    <div class="err-hint" id="err-${step.id}">Please answer this question to continue.</div>
+  </div>`;
+}
+
+// ── INTERACTION ───────────────────────────────────────────────────────────────
+function pickOpt(id, i, multi) {
+  if (multi) {
+    if (!answers[id]) answers[id] = [];
+    const arr = answers[id], pos = arr.indexOf(i);
+    pos === -1 ? arr.push(i) : arr.splice(pos,1);
+  } else {
+    answers[id] = i;
+  }
+  document.querySelectorAll('.opt').forEach((el,idx) => {
+    const step = STEPS[cur];
+    el.classList.toggle('sel', multi
+      ? (answers[id]||[]).includes(idx)
+      : answers[id] === idx);
+  });
+  clearErr(id); updateNav();
+}
+
+function pickScale(id, v) {
+  answers[id] = v;
+  document.querySelectorAll('.scale-item').forEach(el =>
+    el.classList.toggle('sel', parseInt(el.querySelector('.lbl').textContent) === v));
+  clearErr(id); updateNav();
+}
+
+function pickNps(v) {
+  answers.q10 = v;
+  document.querySelectorAll('.nps-btn').forEach(el =>
+    el.classList.toggle('sel', parseInt(el.dataset.v) === v));
+  const fu = document.getElementById('nps-fu');
+  if (fu) fu.classList.toggle('on', v <= 6);
+  clearErr('q10'); updateNav();
+}
+
+function pickP2(id, i) {
+  if (!answers[id]) answers[id] = [];
+  const arr = answers[id], pos = arr.indexOf(i);
+  if (pos !== -1) arr.splice(pos,1);
+  else if (arr.length < 2) arr.push(i);
+
+  document.querySelectorAll('.p2-item').forEach(el => {
+    const idx = parseInt(el.dataset.i);
+    const si = arr.indexOf(idx);
+    const on = si !== -1;
+    const dim = !on && arr.length >= 2;
+    el.classList.toggle('sel', on);
+    el.classList.toggle('dim', dim);
+    let badge = el.querySelector('.p2-badge');
+    if (on) {
+      if (!badge) { badge = document.createElement('div'); badge.className='p2-badge'; el.prepend(badge); }
+      badge.textContent = si+1;
+    } else if (badge) badge.remove();
+  });
+  clearErr(id); updateNav();
+}
+
+// ── PHONE ─────────────────────────────────────────────────────────────────────
+function onPhoneInput(el) {
+  const digits = el.value.replace(/\D/g,'').slice(0,10);
+  let fmt = digits;
+  if (digits.length > 3) fmt = digits.slice(0,3)+'-'+digits.slice(3);
+  if (digits.length > 6) fmt = digits.slice(0,3)+'-'+digits.slice(3,6)+'-'+digits.slice(6);
+  el.value = fmt;
+  answers.phone = fmt;
+  updatePhoneStatus(fmt, false);
+  updateNav();
+}
+
+function onPhoneBlur(el) {
+  updatePhoneStatus(el.value, true);
+  updateNav();
+}
+
+function updatePhoneStatus(val, strict) {
+  const st = document.getElementById('phone-status');
+  if (!st) return;
+  if (!val) { st.innerHTML=''; st.className='phone-status'; return; }
+  const n = normalizePhone(val);
+  if (VALID_PHONES.has(n)) {
+    st.className='phone-status ok'; st.innerHTML='✓ &nbsp;Number recognized — you\'re all set';
+  } else if (strict && /^05\d{8}$/.test(n)) {
+    st.className='phone-status err'; st.innerHTML='✗ &nbsp;Number not found in HuntWise — double-check it';
+  } else if (strict && val.length > 2) {
+    st.className='phone-status err'; st.innerHTML='✗ &nbsp;Enter a valid Israeli mobile (05X-XXX-XXXX)';
+  } else {
+    st.innerHTML=''; st.className='phone-status';
+  }
+}
+
+function toggleAnon() {
+  isAnon = !isAnon;
+  answers.anonymous = isAnon;
+  const box = document.getElementById('anon-box');
+  const sec = document.getElementById('phone-section');
+  if (box) box.classList.toggle('on', isAnon);
+  if (sec) { sec.style.opacity = isAnon?'0.38':'1'; sec.style.pointerEvents = isAnon?'none':''; }
+  updateNav();
+}
+
+// ── VALIDATION ────────────────────────────────────────────────────────────────
+function canGo() {
+  const step = STEPS[cur];
+  if (step.id === 'welcome')  return true;
+  if (step.id === 'thankyou') return true;
+  if (step.id === 'identity') return isAnon || phoneValid(answers.phone||'');
+  if (step.optional) return true;
+  if (step.type === 'single') return answers[step.id] !== undefined;
+  if (step.type === 'multi')  return (answers[step.id]||[]).length > 0;
+  if (step.type === 'scale5') return answers[step.id] !== undefined;
+  if (step.type === 'nps')    return answers[step.id] !== undefined;
+  if (step.type === 'text')   return (answers[step.id]||'').trim().length > 0;
+  if (step.type === 'pick2')  return (answers[step.id]||[]).length === 2;
+  return true;
+}
+
+function clearErr(id) {
+  const el = document.getElementById('err-'+id);
+  if (el) el.classList.remove('on');
+}
+function showErr(id) {
+  const el = document.getElementById('err-'+id);
+  if (el) el.classList.add('on');
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function updateNav() {
+  const step = STEPS[cur];
+  const back = document.getElementById('btn-back');
+  const next = document.getElementById('btn-next');
+  const nav  = document.getElementById('nav');
+
+  if (step.id === 'thankyou') {
+    back.style.display = 'none'; next.style.display = 'none';
+    return;
+  }
+  back.style.display = ''; next.style.display = '';
+  back.disabled = cur === 0;
+  nav.classList.toggle('centered', step.id === 'welcome');
+
+  if (step.id === 'welcome') {
+    next.textContent = "Let's go →";
+    next.disabled = false;
+  } else if (cur === STEPS.length - 2) {
+    next.textContent = 'Submit ✓';
+    next.disabled = !canGo();
+  } else {
+    next.textContent = 'Continue →';
+    next.disabled = !canGo();
+  }
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function show(idx, dir) {
+  const wrap = document.getElementById('step-wrap');
+  const old  = wrap.querySelector('.step');
+  const step = STEPS[idx];
+
+  const div = document.createElement('div');
+  div.innerHTML = html(step);
+  const newEl = div.firstElementChild;
+
+  if (old) {
+    old.classList.add(dir === 'fwd' ? 'out-left' : 'out-right');
+    newEl.classList.add(dir === 'fwd' ? 'in-right' : 'in-left');
+    wrap.appendChild(newEl);
+    setTimeout(() => old.remove(), 360);
+  } else {
+    newEl.style.animation = 'fadeUp .4s ease both';
+    wrap.appendChild(newEl);
+  }
+
+  // Re-attach identity events after render
+  if (step.id === 'identity') {
+    setTimeout(() => {
+      const pi = document.getElementById('phone-input');
+      if (pi && answers.phone) updatePhoneStatus(answers.phone, true);
+      const sec = document.getElementById('phone-section');
+      if (sec && isAnon) { sec.style.opacity='0.38'; sec.style.pointerEvents='none'; }
+    }, 20);
+  }
+
+  updateProgress(idx);
+  updateNav();
+}
+
+function goNext() {
+  if (busy) return;
+  if (!canGo()) { const s = STEPS[cur]; if (s.id.startsWith('q')) showErr(s.id); return; }
+  if (cur === STEPS.length - 2) { submit(); return; }
+  busy = true; cur++;
+  show(cur, 'fwd');
+  setTimeout(() => busy = false, 380);
+}
+
+function goBack() {
+  if (busy || cur === 0) return;
+  busy = true; cur--;
+  show(cur, 'back');
+  setTimeout(() => busy = false, 380);
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────────────────────
+function updateProgress(idx) {
+  const step = STEPS[idx];
+  const wrap = document.getElementById('prog-wrap');
+  if (['welcome','identity','thankyou'].includes(step.id)) {
+    wrap.style.display = 'none'; return;
+  }
+  wrap.style.display = 'flex';
+  const qIdx = Q_STEPS.findIndex(s => s.id === step.id) + 1;
+  const pct  = Math.round((qIdx / Q_STEPS.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${qIdx} of ${Q_STEPS.length}`;
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submit() {
+  const btn = document.getElementById('btn-next');
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+
+  // Build labelled payload
+  const label = (id) => {
+    const st = STEPS.find(s => s.id === id);
+    const v = answers[id];
+    if (v === undefined || v === null) return null;
+    if (!st || !st.opts) return v;
+    if (st.type === 'single') return st.opts[v]?.t;
+    if (st.type === 'multi' || st.type === 'pick2') return (v||[]).map(i => st.opts[i]?.t);
+    return v;
+  };
+
+  const payload = {
+    phone:           isAnon ? 'anonymous' : normalizePhone(answers.phone||''),
+    anonymous:       isAnon,
+    submitted_at:    new Date().toISOString(),
+    q1_source:       label('q1'),
+    q2_setup_time:   label('q2'),
+    q3_features:     label('q3'),
+    q4_match_quality: answers.q4,
+    q5_issues:       answers.q5 || null,
+    q6_action:       label('q6'),
+    q7_vs_before:    label('q7'),
+    q8_weekly_driver: answers.q8 || null,
+    q9_next_feature: label('q9'),
+    q10_nps:         answers.q10,
+    q10b_nps_reason: answers.nps_reason || null,
+    q11_pay:         label('q11'),
+    q12_free_text:   answers.q12 || null,
+  };
+
+  try {
+    if (SUBMIT_URL) {
+      await fetch(SUBMIT_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+    } else {
+      console.log('[HuntWise Survey] Response:', payload);
+      await new Promise(r => setTimeout(r, 700));
+    }
+  } catch(e) { console.error(e); }
+
+  cur = STEPS.length - 1;
+  show(cur, 'fwd');
+  confetti();
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────────
+function confetti() {
+  const colors = ['#FF6B2C','#00C9A7','#6366F1','#F59E0B','#EC4899','#10B981'];
+  for (let i = 0; i < 90; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'cf';
+      const size = 5 + Math.random() * 8;
+      el.style.cssText = `
+        left:${Math.random()*100}vw; top:-10px;
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>.5?'50%':'2px'};
+        animation-duration:${1.6+Math.random()*2}s;
+        animation-delay:${Math.random()*0.6}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 18);
+  }
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    const tag = document.activeElement?.tagName;
+    if (tag === 'TEXTAREA') return;
+    goNext();
+  }
+  if (e.key === 'Escape') goBack();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+show(0, 'fwd');
+</script>
+</body>
+</html>
